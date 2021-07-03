@@ -7,7 +7,7 @@ else
 fi
 SYNC_START=$(date +"%s")
 repo init -u "${manifest_url}" -b "${branch}" --depth 1
-if [ "${official}" != "true" ]; then
+if [ "x${local_manifest_url}" != "x" ]; then
     rm -rf .repo/local_manifests
     mkdir -p .repo/local_manifests
     wget "${local_manifest_url}" -O .repo/local_manifests/manifest.xml
