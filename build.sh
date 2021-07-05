@@ -10,6 +10,7 @@ else
 fi
 source build/envsetup.sh
 source "${my_dir}/config.sh"
+export IS_CIENV=true
 if [ -z "${buildtype}" ]; then
     export buildtype="userdebug"
 fi
