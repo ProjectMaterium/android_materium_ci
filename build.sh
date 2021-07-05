@@ -10,6 +10,7 @@ else
 fi
 source build/envsetup.sh
 source "${my_dir}/config.sh"
+export IS_CIENV=true
 if [ "${official}" == "true" ]; then
     export CUSTOM_BUILD_TYPE="OFFICIAL"
 fi
