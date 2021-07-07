@@ -11,6 +11,9 @@ fi
 source build/envsetup.sh
 source "${my_dir}/config.sh"
 export IS_CIENV=true
+if [ "${official}" == "true" ]; then
+    export RELEASE_TYPE="OFFICIAL"
+fi
 if [ -z "${buildtype}" ]; then
     export buildtype="userdebug"
 fi
