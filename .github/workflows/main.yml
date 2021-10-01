@@ -25,7 +25,7 @@ jobs:
         cd releases
         git remote add jarl https://github.com/JarlPenguin/releases
         git fetch jarl
-        function upstream() { for var in cedric-los18 montana-aosp11 montana-aosp12 montana-los18 montana-los18-4.9 river-los17 river-pe12; do git checkout origin/$var; git rebase jarl/master; git push -f origin HEAD:$var; done; git checkout master; }
+        function upstream() { for var in master; do git checkout origin/$var; git rebase jarl/master; git push -f origin HEAD:$var; done; git checkout master; }
         upstream
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
