@@ -6,7 +6,7 @@ else
     telegram -M "Sync started for [${ROM} ${ROM_VERSION}](${manifest_url}/tree/${branch})"
 fi
 SYNC_START=$(date +"%s")
-repo init -u "${manifest_url}" -b "${branch}" --depth 1
+repo init -u "${manifest_url}" -b "${branch}" --depth 1 -g all,-notdefault,mat_priv
 if [ "x${local_manifest_url}" != "x" ]; then
     rm -rf .repo/local_manifests
     mkdir -p .repo/local_manifests
