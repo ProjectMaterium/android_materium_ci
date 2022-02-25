@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export GITHUB_USER="kiam001"
-export GITHUB_EMAIL="blablatupen@gmail.com"
+export GITHUB_EMAIL="blablatupfen@gmail.com"
 
 #export device=""
 
