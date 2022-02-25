@@ -10,8 +10,8 @@ if [ -z "${GITHUB_TOKEN}" ]; then
     exit 1
 fi
 
-git config user.email "${GITHUB_EMAIL}"
-git config user.name "${GITHUB_USER}"
+#git config user.email "${GITHUB_EMAIL}"
+#git config user.name "${GITHUB_USER}"
 
 mkdir -p "${ROM_DIR}"
 cd "${ROM_DIR}"
