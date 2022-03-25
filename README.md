@@ -1,3 +1,5 @@
+# Status: [![Build Status](https://ci.brvn0.de/job/Project%20Materium/badge/icon)](https://ci.brvn0.de/job/Project%20Materium/)
+
 # Build scripts
 
 **DISCLAIMER**: This is only for Debian-based distributions. WSL is **NOT** supported.
