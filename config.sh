@@ -5,14 +5,15 @@
 
 #export device=""
 
-export ROM="$FLAVOUR"
+export rom_branch=ng-v2
+export ROM="droid-ng"
 export ROM_DIR="${WORKSPACE}/rom"
 export ROM_VERSION="v2.0 Alpha"
 export official="true"
 #export local_manifest_url=""
-export manifest_url="https://github.com/$FLAVOUR/android"
-export rom_vendor_name="materium"
-export branch="$rom_branch"
+export manifest_url="https://github.com/droid-ng/android"
+export rom_vendor_name="ng"
+export branch="ng-v2"
 export bacon="bacon" #"signed_bacon"
 #export buildtype=""
 export clean="installclean"
@@ -24,6 +25,6 @@ export ccache_size="100G"
 
 export jenkins="true"
 
-export release_repo="ProjectMaterium/android_materium_ci"
+export release_repo="droid-ng/android_ng_ci"
 
 export timezone="Europe/Berlin"

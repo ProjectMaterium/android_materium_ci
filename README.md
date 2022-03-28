@@ -1,5 +1,4 @@
-# Status: [![Build Status](https://ci.brvn0.de/job/Project%20Materium/badge/icon)](https://ci.brvn0.de/job/Project%20Materium/)
-
+# Build status [![Build Status](https://ci.brvn0.de/job/droid-ng/badge/icon?style=flat-square)](https://ci.brvn0.de/job/droid-ng/)
 # Build scripts
 
 **DISCLAIMER**: This is only for Debian-based distributions. WSL is **NOT** supported.
