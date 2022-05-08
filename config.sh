@@ -16,7 +16,7 @@ export rom_vendor_name="ng"
 export branch="ng-v2"
 export bacon="bacon" #"signed_bacon"
 #export buildtype=""
-export clean="installclean"
+# export clean="installclean" set via jenkins
 export generate_incremental="false"
 export upload_recovery="true"
 
