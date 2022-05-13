@@ -17,7 +17,7 @@ export branch="ng-v2"
 export bacon="bacon" #"signed_bacon"
 #export buildtype=""
 # export clean="installclean" set via jenkins
-export generate_incremental="true"
+# export generate_incremental="true"
 export upload_recovery="true"
 
 export ccache="true"
