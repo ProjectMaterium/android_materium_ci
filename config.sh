@@ -5,7 +5,7 @@
 
 #export device=""
 
-export rom_branch=ng-v2
+export rom_branch=ng-v3
 export ROM="droid-ng"
 export ROM_DIR="${WORKSPACE}/rom"
 export ROM_VERSION="v2.0 Alpha"
