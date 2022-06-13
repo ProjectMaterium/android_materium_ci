@@ -8,12 +8,12 @@
 export rom_branch=ng-v3
 export ROM="droid-ng"
 export ROM_DIR="${WORKSPACE}/rom"
-export ROM_VERSION="v2.0 Alpha"
+export ROM_VERSION="v3.0 Alpha"
 export official="true"
 #export local_manifest_url=""
 export manifest_url="https://github.com/droidng/android"
 export rom_vendor_name="ng"
-export branch="ng-v2"
+export branch="ng-v3"
 export bacon="bacon" #"signed_bacon"
 #export buildtype=""
 # export clean="installclean" set via jenkins
