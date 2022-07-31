@@ -53,11 +53,9 @@ if [ "${generate_incremental}" == "true" ]; then
     fi
     cp "${new_target_files_path}" "${ROM_DIR}"
 fi
-if [ -e "${outdir}"/droid-ng-*.zip ]; then
-    export finalzip_path=$(ls "${outdir}"/droid-ng-*.zip | tail -n -1)
-else
-    export finalzip_path=$(ls "${outdir}"/*"${device}"-ota-*.zip | tail -n -1)
-fi
+
+export finalzip_path=$(ls "${outdir}" | grep -E "^droid-ng-(.*).zip$" | tail -n -1)
+
 if [ "${upload_recovery}" == "true" ]; then
     if [ ! -e "${outdir}"/recovery.img ]; then
         cp "${outdir}"/boot.img "${outdir}"/recovery.img
