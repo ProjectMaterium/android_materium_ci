@@ -53,7 +53,11 @@ if [ "${generate_incremental}" == "true" ]; then
     fi
     cp "${new_target_files_path}" "${ROM_DIR}"
 fi
+
 export finalzip_path=$(ls "${outdir}" | grep -E "^droid-ng-(.*).zip$" | tail -n -1)
+if [ ${RELEASE_TYPE} == "NIGHTLY" ]; then
+    export finalzip_path=$(ls "${outdir}" | grep -E "^droid-ng(.*)$(date +%Y%m%d)-NIGHTLY(.*).zip$" | tail -n -1)
+fi
 if [ "${upload_recovery}" == "true" ]; then
     if [ ! -e "${outdir}"/recovery.img ]; then
         cp "${outdir}"/boot.img "${outdir}"/recovery.img
