@@ -55,7 +55,7 @@ if [ "${generate_incremental}" == "true" ]; then
 fi
 
 export finalzip_path=$(ls "${outdir}" | grep -E "^droid-ng-(.*).zip$" | tail -n -1)
-if [ ${LINEAGE_BUILDTYPE} == "NIGHTLY" ]; then
+if [ "${LINEAGE_BUILDTYPE}" == "NIGHTLY" ]; then
     export finalzip_path=$(ls "${outdir}" | grep -E "^droid-ng(.*)$(date +%Y%m%d)-NIGHTLY(.*).zip$" | tail -n -1)
 fi
 if [ "${upload_recovery}" == "true" ]; then
