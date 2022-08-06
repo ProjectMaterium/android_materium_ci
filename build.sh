@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export outdir="${ROM_DIR}/out/target/product/${device}"
+export incrdir="${WORKSPACE}/incr"
 BUILD_START=$(date +"%s")
 echo "Build started for ${device}"
 if [ "${jenkins}" == "true" ]; then
@@ -40,9 +41,9 @@ BUILD_END=$(date +"%s")
 BUILD_DIFF=$((BUILD_END - BUILD_START))
 
 if [ "${generate_incremental}" == "true" ]; then
-    if [ -e "${ROM_DIR}"/*"${device}"*target_files*.zip ]; then
+    if [ -e "${incrdir}/${device}.zip" ]; then
         export old_target_files_exists=true
-        export old_target_files_path=$(ls "${ROM_DIR}"/*"${device}"*target_files*.zip | tail -n -1)
+        export old_target_files_path=$(ls "${incrdir}/${device}.zip" | tail -n -1)
     else
         echo "Old target-files package not found, generating incremental package on next build"
     fi
@@ -51,7 +52,7 @@ if [ "${generate_incremental}" == "true" ]; then
         ota_from_target_files -i "${old_target_files_path}" "${new_target_files_path}" "${outdir}"/incremental_ota_update.zip
         export incremental_zip_path=$(ls "${outdir}"/incremental_ota_update.zip | tail -n -1)
     fi
-    cp "${new_target_files_path}" "${ROM_DIR}"
+    cp "${new_target_files_path}" "${incrdir}/${device}.zip"
 fi
 
 export finalzip_path="$outdir/"$(ls "${outdir}" | grep -E "^droid-ng-(.*).zip$" | tail -n -1)
