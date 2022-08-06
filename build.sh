@@ -21,20 +21,20 @@ elif [ "${ccache}" == "true" ] && [ -z "${ccache_size}" ]; then
     echo "Please set the ccache_size variable in your config."
     exit 1
 fi
-#if [ ! -z "${rom_vendor_name}" ]; then
-#    lunch "${rom_vendor_name}_${device}-${buildtype}"
-#else
-#    lunch "${device}-${buildtype}"
-#fi
-#if [ "${clean}" == "clean" ]; then
-#    m clean -j$(nproc --all)
-#elif [ "${clean}" == "installclean" ]; then
-#    m installclean -j$(nproc --all)
-#    rm -rf out/target/product/"${device}"/obj/DTBO_OBJ
-#else
-#    rm "${outdir}"/*$(date +%Y)*.zip*
-#fi
-#m "${bacon}" -j$(nproc --all)
+if [ ! -z "${rom_vendor_name}" ]; then
+    lunch "${rom_vendor_name}_${device}-${buildtype}"
+else
+    lunch "${device}-${buildtype}"
+fi
+if [ "${clean}" == "clean" ]; then
+    m clean -j$(nproc --all)
+elif [ "${clean}" == "installclean" ]; then
+    m installclean -j$(nproc --all)
+    rm -rf out/target/product/"${device}"/obj/DTBO_OBJ
+else
+    rm "${outdir}"/*$(date +%Y)*.zip*
+fi
+m "${bacon}" -j$(nproc --all)
 buildsuccessful="${?}"
 BUILD_END=$(date +"%s")
 BUILD_DIFF=$((BUILD_END - BUILD_START))
@@ -54,9 +54,9 @@ if [ "${generate_incremental}" == "true" ]; then
     cp "${new_target_files_path}" "${ROM_DIR}"
 fi
 
-export finalzip_path=$(ls "${outdir}" | grep -E "^droid-ng-(.*).zip$" | tail -n -1)
+export finalzip_path="$outdir/"$(ls "${outdir}" | grep -E "^droid-ng-(.*).zip$" | tail -n -1)
 if [ "${LINEAGE_BUILDTYPE}" == "NIGHTLY" ]; then
-    export finalzip_path=$(ls "${outdir}" | grep -E "^droid-ng(.*)$(date +%Y%m%d)-NIGHTLY(.*).zip$" | tail -n -1)
+    export finalzip_path="$outdir/"$(ls "${outdir}" | grep -E "^droid-ng(.*)$(date +%Y%m%d)-NIGHTLY(.*).zip$" | tail -n -1)
 fi
 if [ "${upload_recovery}" == "true" ]; then
     if [ ! -e "${outdir}"/recovery.img ]; then
