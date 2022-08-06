@@ -65,7 +65,8 @@ if [ "${upload_recovery}" == "true" ]; then
     export img_path=$(ls "${outdir}"/recovery.img | tail -n -1)
 fi
 export zip_name=$(echo "${finalzip_path}" | sed "s|${outdir}/||")
-export tag=$( echo "$(date +%Y%m%d%H%M)-${zip_name}" | sed 's|.zip||')
+export tag=$( echo "$(env TZ="${timezone}" date +%Y%m%d%H%M)-${zip_name}" | sed 's|.zip||')
+export hash=$(cat "$finalzip_path.sha256sum")
 if [ "${buildsuccessful}" == "0" ] && [ ! -z "${finalzip_path}" ]; then
     echo "Build completed successfully in $((BUILD_DIFF / 60)) minute(s) and $((BUILD_DIFF % 60)) seconds"
 
@@ -73,11 +74,22 @@ if [ "${buildsuccessful}" == "0" ] && [ ! -z "${finalzip_path}" ]; then
 
     github-release "${release_repo}" "${tag}" "master" "${ROM} for ${device}
 
+Hash: $hash
 Date: $(env TZ="${timezone}" date)" "${finalzip_path}"
+
+    github-release "${release_repo}" "${tag}" "master" "${ROM} for ${device}
+
+Hash: $hash
+Date: $(env TZ="${timezone}" date)" "${finalzip_path}.sha256sum"
+    github-release "${release_repo}" "${tag}" "master" "${ROM} for ${device}
+
+Hash: $hash
+Date: $(env TZ="${timezone}" date)" "${finalzip_path}.json"
     if [ "${generate_incremental}" == "true" ]; then
         if [ -e "${incremental_zip_path}" ] && [ "${old_target_files_exists}" == "true" ]; then
             github-release "${release_repo}" "${tag}" "master" "${ROM} for ${device}
 
+Hash: $hash
 Date: $(env TZ="${timezone}" date)" "${incremental_zip_path}"
         elif [ ! -e "${incremental_zip_path}" ] && [ "${old_target_files_exists}" == "true" ]; then
             echo "Build failed in $((BUILD_DIFF / 60)) minute(s) and $((BUILD_DIFF % 60)) seconds"
@@ -90,6 +102,7 @@ Date: $(env TZ="${timezone}" date)" "${incremental_zip_path}"
         if [ -e "${img_path}" ]; then
             github-release "${release_repo}" "${tag}" "master" "${ROM} for ${device}
 
+Hash: $hash
 Date: $(env TZ="${timezone}" date)" "${img_path}"
         else
             echo "Build failed in $((BUILD_DIFF / 60)) minute(s) and $((BUILD_DIFF % 60)) seconds"
