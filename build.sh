@@ -68,7 +68,7 @@ export tag=$( echo "$(date +%Y%m%d%H%M)-${zip_name}" | sed 's|.zip||')
 if [ "${buildsuccessful}" == "0" ] && [ ! -z "${finalzip_path}" ]; then
     echo "Build completed successfully in $((BUILD_DIFF / 60)) minute(s) and $((BUILD_DIFF % 60)) seconds"
 
-    echo "Uploading"
+    echo "Uploading $finalzip_path"
 
     github-release "${release_repo}" "${tag}" "master" "${ROM} for ${device}
 
