@@ -39,30 +39,19 @@ buildsuccessful="${?}"
 BUILD_END=$(date +"%s")
 BUILD_DIFF=$((BUILD_END - BUILD_START))
 
-if [ -z "${previous_ota}" && "${generate_incremental}" == "true" ]; then
-    echo "previous_ota unset!!"
-    export generate_incremental=false
-fi
-
 if [ "${generate_incremental}" == "true" ]; then
-    #if [ -e "${ROM_DIR}"/*"${device}"*target_files*.zip ]; then
-    #    export old_target_files_exists=true
-    #    export old_target_files_path=$(ls "${ROM_DIR}"/*"${device}"*target_files*.zip | tail -n -1)
-    #else
-    #    echo "Old target-files package not found, generating incremental package on next build"
-    #fi
-    export old_target_files_exists=true
-    export old_target_files_path="${outdir}/old_target_files.zip"
-    rm -f "${old_target_files_path}"
-    echo "Downloading old target files..."
-    wget -O "${old_target_files_path}" "https://bigota.droid-ng.eu.org/${previous_ota}.target/old_target_files.zip"
+    if [ -e "${ROM_DIR}"/*"${device}"*target_files*.zip ]; then
+        export old_target_files_exists=true
+        export old_target_files_path=$(ls "${ROM_DIR}"/*"${device}"*target_files*.zip | tail -n -1)
+    else
+        echo "Old target-files package not found, generating incremental package on next build"
+    fi
     export new_target_files_path=$(ls "${outdir}"/obj/PACKAGING/target_files_intermediates/*target_files*.zip | tail -n -1)
     if [ "${old_target_files_exists}" == "true" ]; then
         ota_from_target_files -i "${old_target_files_path}" "${new_target_files_path}" "${outdir}"/incremental_ota_update.zip
         export incremental_zip_path=$(ls "${outdir}"/incremental_ota_update.zip | tail -n -1)
     fi
-    rm -f "${old_target_files_path}"
-    #cp "${new_target_files_path}" "${ROM_DIR}"
+    cp "${new_target_files_path}" "${ROM_DIR}"
 fi
 
 export finalzip_path="$outdir/"$(ls "${outdir}" | grep -E "^droid-ng-(.*).zip$" | tail -n -1)
@@ -78,8 +67,6 @@ fi
 export zip_name=$(echo "${finalzip_path}" | sed "s|${outdir}/||")
 export tag=$( echo "$(env TZ="${timezone}" date +%Y%m%d%H%M)-${zip_name}" | sed 's|.zip||')
 export hash=$(cat "$finalzip_path.sha256sum" | cut -d" " -f1)
-export upload_target_files_path=$(ls "${outdir}"/obj/PACKAGING/target_files_intermediates/*target_files*.zip | tail -n -1)
-export upload_target_files_name=$(basename "${upload_target_files_path}")
 if [ "${buildsuccessful}" == "0" ] && [ ! -z "${finalzip_path}" ]; then
     echo "Build completed successfully in $((BUILD_DIFF / 60)) minute(s) and $((BUILD_DIFF % 60)) seconds"
 
@@ -98,10 +85,6 @@ Date: $(env TZ="${timezone}" date)" "${finalzip_path}.sha256sum"
 
 Hash: $hash
 Date: $(env TZ="${timezone}" date)" "${finalzip_path}.json"
-    github-release "${release_repo}" "${tag}" "master" "${ROM} for ${device}
-
-Hash: $hash
-Date: $(env TZ="${timezone}" date)" "${upload_target_files_path}"
     if [ "${generate_incremental}" == "true" ]; then
         if [ -e "${incremental_zip_path}" ] && [ "${old_target_files_exists}" == "true" ]; then
             github-release "${release_repo}" "${tag}" "master" "${ROM} for ${device}
@@ -158,7 +141,7 @@ Download: ["${zip_name}"]("https://github.com/${release_repo}/releases/download/
 [ ! -z "$TELEGRAM_TOKEN" ] && curl --data parse_mode=HTML --data chat_id=$TELEGRAM_CHAT --data sticker=CAADBQADGgEAAixuhBPbSa3YLUZ8DBYE --request POST https://api.telegram.org/bot$TELEGRAM_TOKEN/sendSticker
 
     # do not leak secret inside PUSH_URL :)
-    wget -O- --post-data '{"'"$hash"'": "'"https://github.com/${release_repo}/releases/download/${tag}/${zip_name}"', "'"$hash.target"'": "'"https://github.com/${release_repo}/releases/download/${tag}/${upload_target_files_name}"'"}' "$PUSH_URL" >/dev/null 2>&1 || echo "-- BIGOTA PUSH FAIL --"
+    wget -O- --post-data '{"'"$hash"'": "'"https://github.com/${release_repo}/releases/download/${tag}/${zip_name}"'"}' "$PUSH_URL" >/dev/null 2>&1 || echo "-- BIGOTA PUSH FAIL --"
     echo "Done"
 else
     echo "Build failed in $((BUILD_DIFF / 60)) minute(s) and $((BUILD_DIFF % 60)) seconds"
