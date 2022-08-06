@@ -66,7 +66,7 @@ if [ "${upload_recovery}" == "true" ]; then
 fi
 export zip_name=$(echo "${finalzip_path}" | sed "s|${outdir}/||")
 export tag=$( echo "$(env TZ="${timezone}" date +%Y%m%d%H%M)-${zip_name}" | sed 's|.zip||')
-export hash=$(cat "$finalzip_path.sha256sum")
+export hash=$(cat "$finalzip_path.sha256sum" | cut -d" " -f1)
 if [ "${buildsuccessful}" == "0" ] && [ ! -z "${finalzip_path}" ]; then
     echo "Build completed successfully in $((BUILD_DIFF / 60)) minute(s) and $((BUILD_DIFF % 60)) seconds"
 
@@ -140,9 +140,13 @@ Download: ["${zip_name}"]("https://github.com/${release_repo}/releases/download/
     fi
 [ ! -z "$TELEGRAM_TOKEN" ] && curl --data parse_mode=HTML --data chat_id=$TELEGRAM_CHAT --data sticker=CAADBQADGgEAAixuhBPbSa3YLUZ8DBYE --request POST https://api.telegram.org/bot$TELEGRAM_TOKEN/sendSticker
 
+    # do not leak secret inside PUSH_URL :)
+    wget -O- --post-data '{"'"$hash"'": "'"https://github.com/${release_repo}/releases/download/${tag}/${zip_name}"'"}' "$PUSH_URL" >/dev/null 2>&1 || echo "-- BIGOTA PUSH FAIL --"
+    echo "Done"
 else
     echo "Build failed in $((BUILD_DIFF / 60)) minute(s) and $((BUILD_DIFF % 60)) seconds"
     telegram -N -M "Build failed in $((BUILD_DIFF / 60)) minute(s) and $((BUILD_DIFF % 60)) seconds"
     [ ! -z "$TELEGRAM_TOKEN" ] && curl --data parse_mode=HTML --data chat_id=$TELEGRAM_CHAT --data sticker=CAADBQADGgEAAixuhBPbSa3YLUZ8DBYE --request POST https://api.telegram.org/bot$TELEGRAM_TOKEN/sendSticker
     exit 1
 fi
+true
