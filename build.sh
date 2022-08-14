@@ -151,7 +151,7 @@ Download: ["${zip_name}"]("https://github.com/${release_repo}/releases/download/
         wget -O- --post-data '{"'"$hash"'": "'"https://github.com/${release_repo}/releases/download/${tag}/${zip_name}"'"}' "$PUSH_URL" >/dev/null 2>&1 || echo "-- BIGOTA PUSH FAIL --"
     fi
     if [ "${LINEAGE_BUILDTYPE}" == "RELEASE" ]; then
-        if ! [ "${generate_incremental}" == "true" ]; then
+        if ! [ "${old_target_files_exists}" == "true" ]; then
             export incrOta="{}"
             export old_incr_ver=""
         fi
