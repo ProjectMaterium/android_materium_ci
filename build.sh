@@ -44,6 +44,7 @@ if [ "${generate_incremental}" == "true" ]; then
     if [ -e "${incrdir}/${device}.zip" ]; then
         export old_target_files_exists=true
         export old_target_files_path=$(ls "${incrdir}/${device}.zip" | tail -n -1)
+        export old_incr_ver=$(cat $(ls "${incrdir}/${device}.txt" | tail -n -1))
     else
         echo "Old target-files package not found, generating incremental package on next build"
     fi
@@ -51,8 +52,10 @@ if [ "${generate_incremental}" == "true" ]; then
     if [ "${old_target_files_exists}" == "true" ]; then
         ota_from_target_files -i "${old_target_files_path}" "${new_target_files_path}" "${outdir}"/incremental_ota_update.zip
         export incremental_zip_path=$(ls "${outdir}"/incremental_ota_update.zip | tail -n -1)
+        export incrOta=$("${ROM_DIR}/vendor/droid-ng/tools/incr-ota-json.sh" "$incremental_zip_path")
     fi
     cp "${new_target_files_path}" "${incrdir}/${device}.zip"
+    awk -F= -v value="ro.build.version.incremental" '!/#/ && $1 == value {OFS="=";$1="";print substr($0,2)}' "$OUT/system/build.prop" > "${incrdir}/${device}.txt"
 fi
 
 export finalzip_path="$outdir/"$(ls "${outdir}" | grep -E "^droid-ng-(.*).zip$" | tail -n -1)
@@ -68,6 +71,7 @@ fi
 export zip_name=$(echo "${finalzip_path}" | sed "s|${outdir}/||")
 export tag=$( echo "$(env TZ="${timezone}" date +%Y%m%d%H%M)-${zip_name}" | sed 's|.zip||')
 export hash=$(cat "$finalzip_path.sha256sum" | cut -d" " -f1)
+export fullOta=$(cat "${finalzip_path}.json")
 if [ "${buildsuccessful}" == "0" ] && [ ! -z "${finalzip_path}" ]; then
     echo "Build completed successfully in $((BUILD_DIFF / 60)) minute(s) and $((BUILD_DIFF % 60)) seconds"
 
@@ -141,8 +145,18 @@ Download: ["${zip_name}"]("https://github.com/${release_repo}/releases/download/
     fi
 [ ! -z "$TELEGRAM_TOKEN" ] && curl --data parse_mode=HTML --data chat_id=$TELEGRAM_CHAT --data sticker=CAADBQADGgEAAixuhBPbSa3YLUZ8DBYE --request POST https://api.telegram.org/bot$TELEGRAM_TOKEN/sendSticker
 
-    # do not leak secret inside PUSH_URL :)
-    wget -O- --post-data '{"'"$hash"'": "'"https://github.com/${release_repo}/releases/download/${tag}/${zip_name}"'"}' "$PUSH_URL" >/dev/null 2>&1 || echo "-- BIGOTA PUSH FAIL --"
+    if [ "${generate_incremental}" == "true" ]; then
+        wget -O- --post-data '{"'"$hash"'": "'"https://github.com/${release_repo}/releases/download/${tag}/${zip_name}"'", "'"$hash.incr"'": "'"https://github.com/${release_repo}/releases/download/${tag}/incremental_ota_update.zip"'"}' "$PUSH_URL" >/dev/null 2>&1 || echo "-- BIGOTA PUSH FAIL --"
+    else
+        wget -O- --post-data '{"'"$hash"'": "'"https://github.com/${release_repo}/releases/download/${tag}/${zip_name}"'"}' "$PUSH_URL" >/dev/null 2>&1 || echo "-- BIGOTA PUSH FAIL --"
+    fi
+    if [ "${LINEAGE_BUILDTYPE}" == "RELEASE" ]; then
+        if ! [ "${generate_incremental}" == "true" ]; then
+            export incrOta="{}"
+            export old_incr_ver=""
+        fi
+        wget -O- --post-data '{"secret": "'"$OTA_SECRET"'", "codename": "'"$device"'", "oldIncr": "'"$old_incr_ver"'", "fullOta": "'"$fullOta"'", "incrOta": "'"$incrOta"'"}' "$OTA_URL" >/dev/null 2>&1 || echo "-- OTA PUSH FAIL --"
+    fi
     echo "Done"
 else
     echo "Build failed in $((BUILD_DIFF / 60)) minute(s) and $((BUILD_DIFF % 60)) seconds"
