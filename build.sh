@@ -155,7 +155,7 @@ Download: ["${zip_name}"]("https://github.com/${release_repo}/releases/download/
             export incrOta="{}"
             export old_incr_ver=""
         fi
-        wget -O- --post-data '{"secret": "'"$OTA_SECRET"'", "codename": "'"$device"'", "oldIncr": "'"$old_incr_ver"'", "fullOta": "'"$fullOta"'", "incrOta": "'"$incrOta"'"}' "$OTA_URL" >/dev/null 2>&1 || echo "-- OTA PUSH FAIL --"
+        wget -O- --post-data '{"secret": "'"$OTA_SECRET"'", "codename": "'"$device"'", "oldIncr": "'"$old_incr_ver"'", "fullOta": "'"$fullOta"'", "incrOta": "'"$incrOta"'"}' "$OTA_URL"
     fi
     echo "Done"
 else
