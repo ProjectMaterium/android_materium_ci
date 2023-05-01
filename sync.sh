@@ -8,9 +8,14 @@ fi
 SYNC_START=$(date +"%s")
 rm -rf .repo/local_manifests
 mkdir -p .repo/local_manifests
-wget "${local_manifest_url}" -O .repo/local_manifests/manifest.xml
-repo init -u "${manifest_url}" -b "${branch}" --depth 1
-repo sync --force-sync --fail-fast --no-tags --no-clone-bundle --optimized-fetch --prune -c -v
+
+if [ ! -z "${local_manifest_url}" ]; then
+    wget "${local_manifest_url}" -O .repo/local_manifests/manifest.xml
+fi
+
+chmod a+x "${my_dir}"/bin/repo
+"${my_dir}"/bin/repo init --git-lfs -u "${manifest_url}" -b "${branch}" --depth 1
+"${my_dir}"/bin/repo sync --force-sync --fail-fast --no-tags --no-clone-bundle --optimized-fetch --prune -c -v
 syncsuccessful="${?}"
 SYNC_END=$(date +"%s")
 SYNC_DIFF=$((SYNC_END - SYNC_START))

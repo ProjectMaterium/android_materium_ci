@@ -15,7 +15,7 @@ if [ -z "${buildtype}" ]; then
 fi
 if [ "${ccache}" == "true" ] && [ -n "${ccache_size}" ]; then
     export USE_CCACHE=1
-    ccache -M "${ccache_size}G"
+    ccache -M "${ccache_size}"
 elif [ "${ccache}" == "true" ] && [ -z "${ccache_size}" ]; then
     echo "Please set the ccache_size variable in your config."
     exit 1
@@ -68,8 +68,7 @@ if [ "${upload_recovery}" == "true" ]; then
     export img_path=$(ls "${outdir}"/recovery.img | tail -n -1)
 fi
 export zip_name=$(echo "${finalzip_path}" | sed "s|${outdir}/||")
-split ${finalzip_path} ${finalzip_path} -C 1GB
-rm ${finalzip_path}
+
 export tag=$( echo "$(env TZ="${timezone}" date +%Y%m%d%H%M)-${zip_name}" | sed 's|.zip||')
 if [ "${buildsuccessful}" == "0" ] && [ ! -z "${finalzip_path}" ]; then
     echo "Build completed successfully in $((BUILD_DIFF / 60)) minute(s) and $((BUILD_DIFF % 60)) seconds"
@@ -138,3 +137,44 @@ else
     curl --data parse_mode=HTML --data chat_id=$TELEGRAM_CHAT --data sticker=CAADBQADGgEAAixuhBPbSa3YLUZ8DBYE --request POST https://api.telegram.org/bot$TELEGRAM_TOKEN/sendSticker
     exit 1
 fi
+
+if [ ! ${push_ota} == "true" ]; then
+    exit 0
+fi
+
+full_hash=$(awk '{print $1}' < "$finalzip_path".sha256sum)
+full_dl_link="https://github.com/${release_repo}/releases/download/${tag}/$(basename "$finalzip_path")"
+postdata="\"$full_hash\": \"$full_dl_link\""
+    
+if [ "${generate_incremental}" == "true" ] && [ -e "${incremental_zip_path}" ] && [ "${old_target_files_exists}" == "true" ]; then
+    # create link for incremental zip
+    incremental_hash=$(sha256sum "$incremental_zip_path" | awk '{print $1}')
+    incremental_dl_link="https://github.com/${release_repo}/releases/download/${tag}/$(basename "$incremental_zip_path")"
+    postdata=$postdata", \"$incremental_hash\": \"$incremental_dl_link\""
+fi
+
+if [ "${upload_recovery}" == "true" ] && [ -e "${img_path}" ]; then
+    # create link for recovery zip
+    recovery_hash=$(sha256sum "$img_path" | awk '{print $1}')
+    postdata=$postdata", \"$recovery_hash\": \"https://github.com/${release_repo}/releases/download/${tag}/$(basename "$img_path")\""
+fi
+
+postdata="{$postdata}"
+    
+if wget -O- --post-data "$postdata" "$bigota_push_url" >/dev/null 2>&1; then
+    successful=1
+    echo "-- BIGOTA PUSH FAIL --"
+    exit 1
+fi
+
+# ota push script w/ bigota link
+ota_full_json=$("$romdir"/vendor/droid-ng/tools/make-ota-json.sh "$finalzip_path") || echo "Failed to create ota json" && return 1
+
+postdata="{\"oldIncr\":\"$ota_incr_id\", \"codename\": \"$device\", \"fullOta\": \"$ota_full_json\""
+if [ "${generate_incremental}" == "true" ] && [ -e "${incremental_zip_path}" ] && [ "${old_target_files_exists}" == "true" ]; then
+    ota_incr_json=$("$romdir"/vendor/droid-ng/tools/make-incr-json.sh "$incremental_zip_path") || echo "Failed to create ota json" && return 1
+    postdata=$postdata", \"incrOta\": \"$ota_incr_json\""
+fi
+postdata="$postdata}"
+
+wget -O- --post-data "$postdata" "$ota_base_url"/v1/registerBuild >/dev/null 2>&1 || echo "-- OTA PUSH FAIL --"
