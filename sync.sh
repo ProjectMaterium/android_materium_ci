@@ -12,14 +12,14 @@ cd "$ROM_DIR" || exit
 rm -rf "$ROM_DIR"/.repo/local_manifests/roomservice.xml
 
 echo "--- Initializing repo ---"
-"$my_dir"/bin/repo init --git-lfs -u "$MANIFEST_URL" -b "$MANIFEST_BRANCH" --depth=1
+"$my_dir"/bin/repo init --git-lfs --submodules -v -u "$MANIFEST_URL" -b "$MANIFEST_BRANCH" --depth=1
 if [ $? -eq 1 ]; then
     echo "Failed to initialize repo"
     exit 1
 fi
 
 echo "--- Syncing repo ---"
-"$my_dir"/bin/repo sync --force-sync --fail-fast --no-tags --no-clone-bundle --optimized-fetch --prune -c -v || echo "--- Failed to sync repo ---"
+"$my_dir"/bin/repo sync --fail-fast --force-sync --force-remove-dirty --fetch-submodules --optimized-fetch -c -v
 if [ $? -eq 1 ]; then
     echo "Failed to sync repo"
     exit 1
