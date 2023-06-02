@@ -19,13 +19,13 @@ if [ $? -eq 1 ]; then
 fi
 
 echo "--- Syncing repo ---"
-"$my_dir"/bin/repo sync --fail-fast --force-sync --no-prune --force-remove-dirty --fetch-submodules -c -v -n
+"$my_dir"/bin/repo sync --fail-fast --force-sync --no-prune --optimized-fetch --force-remove-dirty --fetch-submodules --no-auto-gc -c -v -n
 if [ $? -eq 1 ]; then
     echo "Failed to sync repo"
     exit 1
 fi
 
-"$my_dir"/bin/repo sync --fail-fast --force-sync --no-prune --force-remove-dirty --fetch-submodules -c -v -l
+"$my_dir"/bin/repo sync --fail-fast --force-sync --prune --auto-gc --optimized-fetch --force-remove-dirty --fetch-submodules -c -v -l
 if [ $? -eq 1 ]; then
     echo "Failed to checkout repo"
     exit 1
