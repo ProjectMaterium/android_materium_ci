@@ -19,7 +19,7 @@ if [ $? -eq 1 ]; then
 fi
 
 echo "--- Syncing repo ---"
-"$my_dir"/bin/repo sync --force-sync --optimized-fetch --force-remove-dirty --fetch-submodules c -v -n
+"$my_dir"/bin/repo sync --force-sync --optimized-fetch --force-remove-dirty --fetch-submodules -c -v -n
 if [ $? -eq 1 ]; then
     echo "Failed to sync repo"
     exit 1
