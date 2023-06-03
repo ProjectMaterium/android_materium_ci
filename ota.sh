@@ -23,14 +23,17 @@ echo "--- BIGOTA PUSH DONE ---"
 
 
 ota_full_json=$("$ROM_DIR"/vendor/droid-ng/tools/make-ota-json.sh "$finalzip_path")
-postdata="{\"oldIncr\":\"$ota_incr_id\", \"codename\": \"$device\", \"fullOta\": \"$ota_full_json\""
+postdata="\"oldIncr\":\"$ota_incr_id\", \"codename\": \"$device\", \"fullOta\": \"$ota_full_json\""
 if [ "${generate_incremental}" == "true" ] && [ -e "${incremental_zip_path}" ] && [ "${old_target_files_exists}" == "true" ]; then
     ota_incr_json=$("$ROM_DIR"/vendor/droid-ng/tools/make-incr-json.sh "$incremental_zip_path") || echo "Failed to create ota json" && return 1
     postdata=$postdata", \"incrOta\": \"$ota_incr_json\""
 fi
 postdata="$postdata}"
-
-wget -O- --post-data "$postdata" "$ota_base_url"/v1/registerBuild >/dev/null 2>&1
+echo "--- OTA JSON ---"
+echo "$postdata"
+postdata="{\"secret\":\"$OTA_SECRET\", $postdata}"
+echo "--- OTA PUSH LOG ---"
+wget -O- --post-data "$postdata" "$ota_base_url"/v1/registerBuild
 if [ $? -ne 0 ]; then
     echo "--- OTA PUSH FAIL ---"
     exit 1
